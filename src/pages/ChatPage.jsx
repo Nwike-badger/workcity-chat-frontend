@@ -84,7 +84,7 @@ const ChatPage = () => {
     }
   };
 
-
+  
   const handleSendMessage = (text) => {
     const socket = getSocket();
     if (!socket || !activeConversation) return;
@@ -95,10 +95,25 @@ const ChatPage = () => {
     };
     
     
-    socket.emit("sendMessage", messageData, (newMessage) => {
-        
-        setMessages((prev) => [...prev, newMessage]);
-    });
+    socket.emit("sendMessage", messageData);
+  };
+
+  const handleDeleteConversation = async (conversationId) => {
+    try {
+      await api.delete(`/conversations/${conversationId}`);
+
+      
+      setConversations(prev => prev.filter(conv => conv._id !== conversationId));
+
+      
+      if (activeConversation?._id === conversationId) {
+        setActiveConversation(null);
+        setMessages([]);
+      }
+    } catch (error) {
+      console.error("Failed to delete conversation:", error);
+      
+    }
   };
 
   if (!user) return <p className="p-4">Loading user...</p>;
@@ -125,6 +140,7 @@ const ChatPage = () => {
           setConversations={setConversations}
           onSelectConversation={handleSelectConversation}
           activeConversationId={activeConversation?._id}
+          onDeleteConversation={handleDeleteConversation}
         />
 
         {activeConversation ? (
