@@ -1,35 +1,45 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+// src/App.jsx
+
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import LoginPage from './pages/LoginPage';
+import SignupPage from './pages/SignUpPage';
+import ChatPage from './pages/ChatPage';
+import ProtectedRoute from './components/ProtectedRoute';
+import { AuthProvider } from './context/AuthContext';
+import AdminRoute from './components/AdminRoute';
+import AdminDashboard from './pages/AdminDashboard'; // Import the AuthProvider
 
 function App() {
-  const [count, setCount] = useState(0)
+    return (
+        // Corrected order: Router wraps AuthProvider
+        <Router>
+            {/* Wrap the entire application with AuthProvider to make auth context available */}
+            <AuthProvider>
+                <Routes>
+                    {/* Public Routes */}
+                    <Route path="/login" element={<LoginPage />} />
+                    <Route path="/signup" element={<SignupPage />} />
+                    <Route path="/" element={<LoginPage />} /> {/* Default route to login */}
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+                    {/* Protected Routes */}
+                    {/* All routes inside ProtectedRoute require authentication */}
+                    <Route element={<ProtectedRoute />}>
+                        <Route path="/chat" element={<ChatPage />} />
+                        {/* You can add more protected routes here, e.g., /profile, /admin */}
+                    </Route>
+
+                    <Route element={<AdminRoute />}>
+            <Route path="/admin" element={<AdminDashboard />} />
+            {/* You can add more admin-only routes here */}
+          </Route>
+
+          {/* Fallback Route */}
+          <Route path="*" element={<LoginPage />} />
+                </Routes>
+            </AuthProvider>
+        </Router>
+    );
 }
 
-export default App
+export default App;
